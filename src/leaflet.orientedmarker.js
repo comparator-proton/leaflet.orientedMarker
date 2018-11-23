@@ -52,21 +52,30 @@
                 this._orienteIcon(i, a, s)
             }
         },
-        _orienteIcon: function (i, a, s) {
+       _orienteIcon: function (i, a, s) {
             if (!s) {
                 i.style[L.DomUtil.TRANSFORM] = this._initIconStyle + ' rotate(' + this.options.angle + 'deg)';
                 return;
             }
-            a = L.point(s).divideBy(2)._subtract(L.point(a));
+            var ancorPoint;
             var transform = '';
-            transform += ' translate(' + -a.x + 'px, ' + -a.y + 'px)';
+
+            if (L.version[1]=='0') {
+                ancorPoint = L.point(s).divideBy(2)._subtract(L.point(a)); // for leaflet 0.7 version
+            } else {    // for leaflet 1.x version
+                ancorPoint=L.point(a);
+                ancorPoint.x=-ancorPoint.x; ancorPoint.y=-ancorPoint.y;
+            }
+
+            transform += ' translate(' + -ancorPoint.x + 'px, ' + -ancorPoint.y + 'px)';
             transform += ' rotate(' + this.options.angle + 'deg)';
-            transform += ' translate(' + a.x + 'px, ' + a.y + 'px)';
+            transform += ' translate(' + ancorPoint.x + 'px, ' + ancorPoint.y + 'px)';// for leaflet 0.7 version
+          
             i.style[L.DomUtil.TRANSFORM] = this._initIconStyle +' ' +transform;
         },
         onRemove: function (map) {
-            this._orientationLine.onRemove(this._map);
-            this._orientationCircle.onRemove(this._map);
+            if (this._orientationLine) this._orientationLine.onRemove(this._map);
+            if (this._orientationCircle) this._orientationCircle.onRemove(this._map);
             L.Marker.prototype.onRemove.call(this, map);
             return this;
         },
